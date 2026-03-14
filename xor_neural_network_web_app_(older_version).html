@@ -1,0 +1,1627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>XOR Neural Network Explorer</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #07111f;
+      --bg-2: #0d1b2f;
+      --panel: rgba(14, 29, 52, 0.86);
+      --panel-2: rgba(20, 42, 74, 0.82);
+      --line: rgba(116, 170, 255, 0.18);
+      --text: #eaf4ff;
+      --muted: #b7cae8;
+      --blue: #4ea0ff;
+      --blue-2: #7cc1ff;
+      --blue-3: #1e6dff;
+      --cyan: #64e4ff;
+      --green: #36d399;
+      --pink: #f04f9b;
+      --orange: #ffb357;
+      --shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(78, 160, 255, 0.16), transparent 26%),
+        radial-gradient(circle at 80% 10%, rgba(100, 228, 255, 0.12), transparent 24%),
+        linear-gradient(180deg, #06101c 0%, #0a1628 45%, #07111f 100%);
+      min-height: 100vh;
+    }
+
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(124, 193, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124, 193, 255, 0.03) 1px, transparent 1px);
+      background-size: 32px 32px;
+      mask-image: linear-gradient(180deg, rgba(255,255,255,0.85), rgba(255,255,255,0.28));
+    }
+
+    .container {
+      width: min(1240px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 24px 0 48px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero {
+      padding: 30px;
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      background: linear-gradient(135deg, rgba(21, 49, 88, 0.92), rgba(9, 21, 40, 0.92));
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      position: relative;
+      margin-bottom: 22px;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 420px;
+      height: 420px;
+      right: -140px;
+      top: -140px;
+      background: radial-gradient(circle, rgba(100, 228, 255, 0.18), transparent 62%);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--blue-2);
+      font-size: 0.92rem;
+      letter-spacing: 0.02em;
+    }
+
+    .hero h1 {
+      margin: 18px 0 12px;
+      font-size: clamp(2rem, 3.8vw, 3.7rem);
+      line-height: 1.04;
+      max-width: 13ch;
+    }
+
+    .hero p {
+      margin: 0;
+      max-width: 78ch;
+      color: var(--muted);
+      font-size: 1.05rem;
+      line-height: 1.75;
+    }
+
+    .hero-links {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 22px;
+    }
+
+    .hero-links a {
+      text-decoration: none;
+      color: var(--text);
+      padding: 12px 16px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      transition: transform 180ms ease, background 180ms ease;
+    }
+
+    .hero-links a:hover {
+      transform: translateY(-2px);
+      background: rgba(255,255,255,0.1);
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+    }
+
+    .section {
+      margin-top: 22px;
+      padding: 22px;
+    }
+
+    .section h2 {
+      margin: 0 0 8px;
+      font-size: clamp(1.5rem, 2vw, 2rem);
+    }
+
+    .section p.lead {
+      margin: 0 0 18px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .control-card {
+      grid-column: span 4;
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 18px;
+      padding: 16px;
+    }
+
+    .control-card h3,
+    .sub-card h3,
+    .chart-card h3,
+    .metric-card h3,
+    .explain-card h3,
+    .formula-card h3 {
+      margin: 0 0 10px;
+      font-size: 1rem;
+      letter-spacing: 0.01em;
+    }
+
+    .control-card p,
+    .sub-card p,
+    .chart-card p,
+    .metric-card p,
+    .explain-card p,
+    .formula-card p,
+    li,
+    td,
+    th {
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.92rem;
+      color: var(--blue-2);
+      margin-bottom: 6px;
+    }
+
+    input,
+    select,
+    button {
+      font: inherit;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 11px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(4, 12, 24, 0.78);
+      color: var(--text);
+      outline: none;
+      transition: border-color 180ms ease, box-shadow 180ms ease;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: rgba(124, 193, 255, 0.68);
+      box-shadow: 0 0 0 4px rgba(78, 160, 255, 0.12);
+    }
+
+    .button-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 14px;
+      padding: 12px 16px;
+      cursor: pointer;
+      color: white;
+      transition: transform 160ms ease, opacity 160ms ease, filter 160ms ease;
+      font-weight: 600;
+      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.2);
+    }
+
+    button:hover { transform: translateY(-2px); }
+    button:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+    .btn-primary { background: linear-gradient(135deg, var(--blue), var(--blue-3)); }
+    .btn-secondary { background: linear-gradient(135deg, #395b89, #1b3558); }
+    .btn-success { background: linear-gradient(135deg, #1cb27a, #10895d); }
+    .btn-warning { background: linear-gradient(135deg, #f0a43d, #ca7e16); }
+    .btn-danger { background: linear-gradient(135deg, #ff6b8a, #e23a5f); }
+
+    .small-note {
+      font-size: 0.9rem;
+      color: #c4d7f5;
+      margin-top: 12px;
+    }
+
+    .status-bar {
+      margin-top: 16px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: rgba(4, 12, 24, 0.68);
+      border: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text);
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--blue-2);
+      box-shadow: 0 0 14px rgba(124, 193, 255, 0.8);
+    }
+
+    .simulation-layout {
+      display: grid;
+      grid-template-columns: 1.5fr 0.9fr;
+      gap: 18px;
+      margin-top: 18px;
+      align-items: start;
+    }
+
+    .diagram-card,
+    .side-card,
+    .chart-card,
+    .metric-card,
+    .sub-card,
+    .formula-card,
+    .explain-card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 16px;
+    }
+
+    .diagram-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .diagram-stage {
+      position: relative;
+      border-radius: 18px;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at top, rgba(100, 228, 255, 0.12), transparent 40%),
+        linear-gradient(180deg, rgba(7,18,34,0.98), rgba(10,22,40,0.98));
+      border: 1px solid rgba(255,255,255,0.06);
+      min-height: 500px;
+    }
+
+    #networkSvg {
+      display: block;
+      width: 100%;
+      height: 520px;
+    }
+
+    .diagram-overlay {
+      position: absolute;
+      left: 14px;
+      bottom: 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .diagram-badge {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(8, 19, 37, 0.82);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .side-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .metric-value {
+      font-size: 1.85rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .metric-help {
+      font-size: 0.9rem;
+    }
+
+    .chart-grid {
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .chart-box {
+      position: relative;
+      height: 290px;
+    }
+
+    .boundary-box {
+      height: 360px;
+    }
+
+    canvas {
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      margin-top: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 640px;
+    }
+
+    th,
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      text-align: left;
+      font-size: 0.95rem;
+    }
+
+    th {
+      color: var(--blue-2);
+      font-weight: 700;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1.12fr 0.88fr;
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .formula-visual {
+      display: grid;
+      place-items: center;
+      padding: 14px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(5, 14, 28, 0.85), rgba(8, 20, 38, 0.85));
+      border: 1px solid rgba(255,255,255,0.06);
+      overflow: hidden;
+    }
+
+    .formula-visual svg {
+      width: 100%;
+      max-width: 500px;
+      height: auto;
+    }
+
+    code.inline {
+      background: rgba(255,255,255,0.06);
+      padding: 2px 7px;
+      border-radius: 8px;
+      color: #f7fbff;
+      border: 1px solid rgba(255,255,255,0.08);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.92em;
+    }
+
+    ul.clean {
+      margin: 8px 0 0;
+      padding-left: 18px;
+    }
+
+    .footer-note {
+      text-align: center;
+      color: var(--muted);
+      margin-top: 26px;
+      padding-bottom: 16px;
+      font-size: 0.95rem;
+    }
+
+    @media (max-width: 1120px) {
+      .control-card { grid-column: span 6; }
+      .simulation-layout,
+      .two-col,
+      .chart-grid {
+        grid-template-columns: 1fr;
+      }
+      .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 720px) {
+      .container { width: min(100% - 20px, 100%); }
+      .hero, .section { padding: 18px; }
+      .control-card { grid-column: span 12; }
+      .field-grid { grid-template-columns: 1fr; }
+      .metrics-grid { grid-template-columns: 1fr; }
+      #networkSvg { height: 430px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+
+  <div class="container">
+    <header class="hero">
+      <div class="eyebrow">🧠 XOR Neural Network • Interactive Learning Website</div>
+      <h1>Watch a small neural network learn XOR in real time.</h1>
+      <p>
+        This page shows how a simple feed-forward neural network with backpropagation solves the XOR problem,
+        which a linear model cannot solve on its own. You can train the model step by step, pause it,
+        reset it, test your own inputs, inspect weights and biases, and study how the decision boundary changes.
+      </p>
+      <div class="hero-links">
+        <a href="#simulator">Open simulator</a>
+        <a href="#explanation">Read explanation</a>
+      </div>
+    </header>
+
+    <section class="panel section" id="simulator">
+      <h2>Interactive XOR Simulator</h2>
+      <p class="lead">
+        Configure the model, start live training, and inspect what happens inside the network during each epoch.
+        The default model is a 2 → 2 → 1 network using sigmoid activation and gradient descent.
+      </p>
+
+      <div class="controls-grid">
+        <div class="control-card">
+          <h3>Training Controls</h3>
+          <div class="field-grid">
+            <div>
+              <label for="epochsInput">Epochs</label>
+              <input id="epochsInput" type="number" min="1" max="20000" step="1" value="2500" />
+            </div>
+            <div>
+              <label for="learningRateInput">Learning rate</label>
+              <input id="learningRateInput" type="number" min="0.001" max="3" step="0.001" value="0.7" />
+            </div>
+            <div>
+              <label for="speedInput">Animation speed</label>
+              <select id="speedInput">
+                <option value="1">Slow (1 epoch / tick)</option>
+                <option value="5" selected>Normal (5 epochs / tick)</option>
+                <option value="25">Fast (25 epochs / tick)</option>
+                <option value="100">Very fast (100 epochs / tick)</option>
+              </select>
+            </div>
+            <div>
+              <label for="sampleSelect">Visible training sample</label>
+              <select id="sampleSelect">
+                <option value="auto" selected>Auto cycle</option>
+                <option value="0">(0, 0) → 0</option>
+                <option value="1">(0, 1) → 1</option>
+                <option value="2">(1, 0) → 1</option>
+                <option value="3">(1, 1) → 0</option>
+              </select>
+            </div>
+          </div>
+          <div class="button-row">
+            <button class="btn-primary" id="startBtn">Start</button>
+            <button class="btn-warning" id="pauseBtn">Pause</button>
+            <button class="btn-success" id="stepBtn">Step</button>
+            <button class="btn-danger" id="resetBtn">Reset</button>
+            <button class="btn-secondary" id="randomizeBtn">Randomize Weights</button>
+          </div>
+          <p class="small-note">
+            <strong>Tip:</strong> use <code class="inline">Step</code> to inspect one training update at a time,
+            or use <code class="inline">Start</code> for live training.
+          </p>
+        </div>
+
+        <div class="control-card">
+          <h3>Initial Weights and Biases</h3>
+          <div class="field-grid">
+            <div>
+              <label for="w1">w₁ (x1 → h1)</label>
+              <input id="w1" type="number" step="0.01" value="0.25" />
+            </div>
+            <div>
+              <label for="w2">w₂ (x2 → h1)</label>
+              <input id="w2" type="number" step="0.01" value="-0.45" />
+            </div>
+            <div>
+              <label for="w3">w₃ (x1 → h2)</label>
+              <input id="w3" type="number" step="0.01" value="-0.35" />
+            </div>
+            <div>
+              <label for="w4">w₄ (x2 → h2)</label>
+              <input id="w4" type="number" step="0.01" value="0.40" />
+            </div>
+            <div>
+              <label for="w5">w₅ (h1 → y)</label>
+              <input id="w5" type="number" step="0.01" value="0.30" />
+            </div>
+            <div>
+              <label for="w6">w₆ (h2 → y)</label>
+              <input id="w6" type="number" step="0.01" value="-0.20" />
+            </div>
+            <div>
+              <label for="b1">b₁ (hidden neuron 1)</label>
+              <input id="b1" type="number" step="0.01" value="0.10" />
+            </div>
+            <div>
+              <label for="b2">b₂ (hidden neuron 2)</label>
+              <input id="b2" type="number" step="0.01" value="-0.10" />
+            </div>
+            <div>
+              <label for="b3">b₃ (output neuron)</label>
+              <input id="b3" type="number" step="0.01" value="0.05" />
+            </div>
+          </div>
+        </div>
+
+        <div class="control-card">
+          <h3>Manual Test / Forward Pass</h3>
+          <div class="field-grid">
+            <div>
+              <label for="testX1">Input x1</label>
+              <input id="testX1" type="number" min="0" max="1" step="0.01" value="1" />
+            </div>
+            <div>
+              <label for="testX2">Input x2</label>
+              <input id="testX2" type="number" min="0" max="1" step="0.01" value="0" />
+            </div>
+            <div>
+              <label for="manualBias1">Override b₁</label>
+              <input id="manualBias1" type="number" step="0.01" placeholder="Uses trained b₁" />
+            </div>
+            <div>
+              <label for="manualBias2">Override b₂</label>
+              <input id="manualBias2" type="number" step="0.01" placeholder="Uses trained b₂" />
+            </div>
+            <div>
+              <label for="manualBias3">Override b₃</label>
+              <input id="manualBias3" type="number" step="0.01" placeholder="Uses trained b₃" />
+            </div>
+            <div>
+              <label for="thresholdInput">Binary threshold</label>
+              <input id="thresholdInput" type="number" min="0" max="1" step="0.01" value="0.50" />
+            </div>
+          </div>
+          <div class="button-row">
+            <button class="btn-secondary" id="runTestBtn">Run manual test</button>
+          </div>
+          <div class="status-bar" style="margin-top:12px;">
+            <div>
+              <div style="font-size:0.9rem; color: var(--blue-2);">Manual output</div>
+              <div id="manualOutputText" style="font-size:1.35rem; font-weight:800; margin-top:4px;">Not calculated yet</div>
+            </div>
+            <div>
+              <div style="font-size:0.9rem; color: var(--blue-2);">Predicted XOR class</div>
+              <div id="manualClassText" style="font-size:1.35rem; font-weight:800; margin-top:4px;">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="status-bar">
+        <div class="status-pill"><span class="dot" id="runDot"></span> <span id="statusText">Idle</span></div>
+        <div><strong>Epoch:</strong> <span id="epochText">0</span> / <span id="epochMaxText">2500</span></div>
+        <div><strong>Current sample:</strong> <span id="sampleText">(0, 0) → 0</span></div>
+        <div><strong>Learning rate:</strong> <span id="lrText">0.700</span></div>
+      </div>
+
+      <div class="simulation-layout">
+        <div class="diagram-card">
+          <div class="diagram-header">
+            <div>
+              <h3 style="margin-bottom:4px;">Network diagram</h3>
+              <p style="margin:0;">Inputs, neuron activations, weights, biases, and output update live during training.</p>
+            </div>
+            <div class="status-pill">Target: <span id="targetText">0</span> • Output: <span id="outputText">0.000</span></div>
+          </div>
+          <div class="diagram-stage">
+            <svg id="networkSvg" viewBox="0 0 1000 520" aria-label="Neural network diagram"></svg>
+            <div class="diagram-overlay">
+              <div class="diagram-badge">Hidden activations: <span id="overlayHidden">0.000, 0.000</span></div>
+              <div class="diagram-badge">Output activation: <span id="overlayOutput">0.000</span></div>
+              <div class="diagram-badge">Average error: <span id="overlayAvgError">0.000000</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="side-grid">
+          <div class="side-card">
+            <h3>Current forward pass</h3>
+            <p id="forwardDetails">Run the simulator to inspect the latest values.</p>
+          </div>
+          <div class="side-card">
+            <h3>Weights and biases</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Parameter</th>
+                    <th>Value</th>
+                  </tr>
+                </thead>
+                <tbody id="weightsTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="side-card">
+            <h3>XOR truth table check</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Input</th>
+                    <th>Target</th>
+                    <th>Output</th>
+                    <th>Class</th>
+                  </tr>
+                </thead>
+                <tbody id="truthTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <h3>Absolute error</h3>
+          <div class="metric-value" id="absErrorMetric">0.000000</div>
+          <div class="metric-help">The current sample error <code class="inline">|target - output|</code>.</div>
+        </div>
+        <div class="metric-card">
+          <h3>Average loss</h3>
+          <div class="metric-value" id="avgErrorMetric">0.000000</div>
+          <div class="metric-help">The mean squared error over the 4 XOR samples.</div>
+        </div>
+        <div class="metric-card">
+          <h3>Output class</h3>
+          <div class="metric-value" id="classMetric">0</div>
+          <div class="metric-help">Binary prediction using the selected threshold.</div>
+        </div>
+        <div class="metric-card">
+          <h3>Progress</h3>
+          <div class="metric-value" id="progressMetric">0%</div>
+          <div class="metric-help">How much of the planned training has already run.</div>
+        </div>
+      </div>
+
+      <div class="chart-grid">
+        <div class="chart-card">
+          <h3>Error over time</h3>
+          <p>Absolute error and average loss change during training.</p>
+          <div class="chart-box"><canvas id="errorChart"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3>Neuron activations</h3>
+          <p>Hidden neurons and the output neuron change their activations for the visible sample.</p>
+          <div class="chart-box"><canvas id="activationChart"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3>Selected weights</h3>
+          <p>Connection weights evolve as backpropagation pushes the network toward the XOR pattern.</p>
+          <div class="chart-box"><canvas id="weightChart"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3>Decision boundary / XOR region</h3>
+          <p>The background shows the network output across the input plane. The XOR samples are overlaid.</p>
+          <div class="chart-box boundary-box"><canvas id="boundaryCanvas"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel section" id="explanation">
+      <h2>How the XOR network works</h2>
+      <p class="lead">
+        This explanation is written for students who know some math, but every term is also described in a beginner-friendly way.
+        The main idea is simple: XOR needs a non-linear model, so we use a hidden layer and sigmoid activations.
+      </p>
+
+      <div class="two-col">
+        <div class="explain-card">
+          <h3>Why XOR is a classic neural network example</h3>
+          <p>
+            XOR returns <code class="inline">1</code> only when the two inputs are different. That gives the truth table
+            <code class="inline">(0,0)→0</code>, <code class="inline">(0,1)→1</code>, <code class="inline">(1,0)→1</code>, <code class="inline">(1,1)→0</code>.
+            If we place these four points on a coordinate plane, there is no single straight line that separates the 1-class points from the 0-class points.
+            Because of that, XOR is <strong>not linearly separable</strong>.
+          </p>
+          <p>
+            A model with only one neuron and one weighted sum behaves like a linear classifier. It can tilt and move a single line,
+            but it still stays a line. XOR needs a curved or piecewise decision shape, so we add a hidden layer.
+            The hidden neurons can create intermediate features, and the output neuron combines them into the final XOR behavior.
+          </p>
+          <h3 style="margin-top:18px;">Basic parts of the model</h3>
+          <ul class="clean">
+            <li><strong>Input layer:</strong> receives <code class="inline">x₁</code> and <code class="inline">x₂</code>.</li>
+            <li><strong>Weights:</strong> numbers that tell each connection how strongly one neuron affects another.</li>
+            <li><strong>Bias:</strong> an extra adjustable value that shifts a neuron's activation threshold.</li>
+            <li><strong>Weighted sum:</strong> the value before activation, such as <code class="inline">z = w₁x₁ + w₂x₂ + b</code>.</li>
+            <li><strong>Activation function:</strong> here we use sigmoid, which squeezes values into the range 0 to 1.</li>
+            <li><strong>Hidden layer:</strong> helps the network learn non-linear patterns.</li>
+            <li><strong>Output layer:</strong> produces the final prediction for XOR.</li>
+            <li><strong>Loss / error:</strong> tells us how far the prediction is from the desired target.</li>
+            <li><strong>Backpropagation:</strong> computes how each weight and bias should change to reduce the error.</li>
+            <li><strong>Gradient descent:</strong> the update rule that moves parameters in a better direction step by step.</li>
+          </ul>
+        </div>
+
+        <div class="formula-card">
+          <h3>Model diagram and formulas</h3>
+          <div class="formula-visual">
+            <svg viewBox="0 0 520 530" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Neural network formulas diagram">
+              <defs>
+                <linearGradient id="nodeFill" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#4ea0ff" />
+                  <stop offset="100%" stop-color="#64e4ff" />
+                </linearGradient>
+                <linearGradient id="nodeFill2" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#1cb27a" />
+                  <stop offset="100%" stop-color="#64e4ff" />
+                </linearGradient>
+              </defs>
+              <rect x="0" y="0" width="520" height="530" rx="28" fill="#071423" stroke="rgba(255,255,255,0.08)"/>
+              <text x="58" y="64" fill="#dff3ff" font-size="24" font-family="Segoe UI, sans-serif">Inputs</text>
+              <text x="210" y="64" fill="#dff3ff" font-size="24" font-family="Segoe UI, sans-serif">Hidden layer</text>
+              <text x="396" y="64" fill="#dff3ff" font-size="24" font-family="Segoe UI, sans-serif">Output</text>
+
+              <circle cx="85" cy="170" r="34" fill="url(#nodeFill)"/>
+              <circle cx="85" cy="310" r="34" fill="url(#nodeFill)"/>
+              <circle cx="265" cy="140" r="38" fill="url(#nodeFill2)"/>
+              <circle cx="265" cy="340" r="38" fill="url(#nodeFill2)"/>
+              <circle cx="435" cy="240" r="40" fill="url(#nodeFill)"/>
+
+              <text x="70" y="178" fill="#07111f" font-size="28" font-weight="700">x₁</text>
+              <text x="70" y="318" fill="#07111f" font-size="28" font-weight="700">x₂</text>
+              <text x="244" y="148" fill="#07111f" font-size="26" font-weight="700">h₁</text>
+              <text x="244" y="348" fill="#07111f" font-size="26" font-weight="700">h₂</text>
+              <text x="420" y="248" fill="#07111f" font-size="28" font-weight="700">y</text>
+
+              <line x1="118" y1="170" x2="229" y2="140" stroke="#7cc1ff" stroke-width="4"/>
+              <line x1="118" y1="170" x2="229" y2="340" stroke="#7cc1ff" stroke-width="4"/>
+              <line x1="118" y1="310" x2="229" y2="140" stroke="#7cc1ff" stroke-width="4"/>
+              <line x1="118" y1="310" x2="229" y2="340" stroke="#7cc1ff" stroke-width="4"/>
+              <line x1="303" y1="140" x2="395" y2="240" stroke="#7cc1ff" stroke-width="4"/>
+              <line x1="303" y1="340" x2="395" y2="240" stroke="#7cc1ff" stroke-width="4"/>
+
+              <text x="146" y="148" fill="#dff3ff" font-size="16">w₁</text>
+              <text x="144" y="250" fill="#dff3ff" font-size="16">w₃</text>
+              <text x="154" y="214" fill="#dff3ff" font-size="16">w₂</text>
+              <text x="152" y="342" fill="#dff3ff" font-size="16">w₄</text>
+              <text x="336" y="166" fill="#dff3ff" font-size="16">w₅</text>
+              <text x="336" y="316" fill="#dff3ff" font-size="16">w₆</text>
+
+              <text x="40" y="410" fill="#dff3ff" font-size="19">z₁ = w₁x₁ + w₂x₂ + b₁</text>
+              <text x="40" y="438" fill="#dff3ff" font-size="19">h₁ = σ(z₁)</text>
+              <text x="40" y="470" fill="#dff3ff" font-size="19">z₂ = w₃x₁ + w₄x₂ + b₂</text>
+              <text x="40" y="498" fill="#dff3ff" font-size="19">h₂ = σ(z₂)</text>
+
+              <text x="284" y="410" fill="#dff3ff" font-size="19">z₃ = w₅h₁ + w₆h₂ + b₃</text>
+              <text x="284" y="438" fill="#dff3ff" font-size="19">y = σ(z₃)</text>
+              <text x="284" y="470" fill="#dff3ff" font-size="19">Error = target - y</text>
+              <text x="284" y="498" fill="#dff3ff" font-size="19">σ(x) = 1 / (1 + e⁻ˣ)</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="explain-card">
+          <h3>Forward pass: how the network makes a prediction</h3>
+          <p>
+            In the <strong>forward pass</strong>, the input values move from left to right through the network.
+            First, each hidden neuron calculates a weighted sum. Then the sigmoid activation function converts that sum into a value between 0 and 1.
+            After that, the output neuron does the same using the hidden activations as its inputs.
+          </p>
+          <p>
+            This means the model is really computing a chain of mathematical functions.
+            Even though each individual weighted sum is linear, the sigmoid activation introduces non-linearity.
+            That non-linearity is exactly what makes XOR possible.
+          </p>
+          <h3 style="margin-top:18px;">Backpropagation: how the network learns</h3>
+          <p>
+            Once the output is produced, we compare it with the correct target. The difference creates an error signal.
+            Backpropagation moves this signal backward through the network and calculates how much each weight and bias contributed to the error.
+            Then gradient descent updates each parameter a little bit in the direction that should reduce the error next time.
+          </p>
+          <p>
+            The learning rate controls the size of those updates. If it is too small, learning is slow. If it is too large,
+            the network may jump around and train unstably. During training, the goal is to reduce the average error over all four XOR samples.
+          </p>
+        </div>
+
+        <div class="explain-card">
+          <h3>Why a hidden layer helps</h3>
+          <p>
+            A good way to imagine the hidden layer is that it creates useful intermediate tests.
+            One hidden neuron can learn a boundary that reacts strongly to one part of the input space,
+            and another hidden neuron can learn a different boundary. The output neuron can then combine those two signals.
+          </p>
+          <p>
+            For XOR, the hidden neurons usually learn a pair of diagonal-style separators. Together they let the final output form a region where
+            <code class="inline">(0,1)</code> and <code class="inline">(1,0)</code> end up on the 1 side, while
+            <code class="inline">(0,0)</code> and <code class="inline">(1,1)</code> stay on the 0 side.
+          </p>
+          <h3 style="margin-top:18px;">How to present this in class</h3>
+          <ul class="clean">
+            <li>Start from the XOR truth table.</li>
+            <li>Show that one straight line cannot separate the classes.</li>
+            <li>Introduce a hidden layer as the key non-linear improvement.</li>
+            <li>Explain the forward pass with the formulas shown above.</li>
+            <li>Explain training as repeated correction based on error.</li>
+            <li>Use the charts to show that the network gradually improves.</li>
+            <li>End by pointing at the decision boundary plot and truth table outputs.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <div class="footer-note">
+      Built as an educational XOR neural network demonstrator with live visualization, charts, and beginner-friendly explanations.
+    </div>
+  </div>
+
+  <script>
+    const dataset = [
+      { input: [0, 0], target: 0, label: '(0, 0) → 0' },
+      { input: [0, 1], target: 1, label: '(0, 1) → 1' },
+      { input: [1, 0], target: 1, label: '(1, 0) → 1' },
+      { input: [1, 1], target: 0, label: '(1, 1) → 0' }
+    ];
+
+    const dom = {
+      epochsInput: document.getElementById('epochsInput'),
+      learningRateInput: document.getElementById('learningRateInput'),
+      speedInput: document.getElementById('speedInput'),
+      sampleSelect: document.getElementById('sampleSelect'),
+      thresholdInput: document.getElementById('thresholdInput'),
+      startBtn: document.getElementById('startBtn'),
+      pauseBtn: document.getElementById('pauseBtn'),
+      stepBtn: document.getElementById('stepBtn'),
+      resetBtn: document.getElementById('resetBtn'),
+      randomizeBtn: document.getElementById('randomizeBtn'),
+      runTestBtn: document.getElementById('runTestBtn'),
+      statusText: document.getElementById('statusText'),
+      runDot: document.getElementById('runDot'),
+      epochText: document.getElementById('epochText'),
+      epochMaxText: document.getElementById('epochMaxText'),
+      sampleText: document.getElementById('sampleText'),
+      lrText: document.getElementById('lrText'),
+      targetText: document.getElementById('targetText'),
+      outputText: document.getElementById('outputText'),
+      overlayHidden: document.getElementById('overlayHidden'),
+      overlayOutput: document.getElementById('overlayOutput'),
+      overlayAvgError: document.getElementById('overlayAvgError'),
+      absErrorMetric: document.getElementById('absErrorMetric'),
+      avgErrorMetric: document.getElementById('avgErrorMetric'),
+      classMetric: document.getElementById('classMetric'),
+      progressMetric: document.getElementById('progressMetric'),
+      forwardDetails: document.getElementById('forwardDetails'),
+      weightsTableBody: document.getElementById('weightsTableBody'),
+      truthTableBody: document.getElementById('truthTableBody'),
+      manualOutputText: document.getElementById('manualOutputText'),
+      manualClassText: document.getElementById('manualClassText'),
+      networkSvg: document.getElementById('networkSvg')
+    };
+
+    const paramInputs = ['w1', 'w2', 'w3', 'w4', 'w5', 'w6', 'b1', 'b2', 'b3']
+      .reduce((acc, id) => ({ ...acc, [id]: document.getElementById(id) }), {});
+
+    const manualBiasInputs = {
+      b1: document.getElementById('manualBias1'),
+      b2: document.getElementById('manualBias2'),
+      b3: document.getElementById('manualBias3')
+    };
+
+    const testInputEls = {
+      x1: document.getElementById('testX1'),
+      x2: document.getElementById('testX2')
+    };
+
+    const state = {
+      running: false,
+      timerId: null,
+      epoch: 0,
+      maxEpochs: 2500,
+      learningRate: 0.7,
+      speed: 5,
+      threshold: 0.5,
+      sampleIndex: 0,
+      cycleIndex: 0,
+      params: {
+        w1: 0.25, w2: -0.45, w3: -0.35, w4: 0.40, w5: 0.30, w6: -0.20,
+        b1: 0.10, b2: -0.10, b3: 0.05
+      },
+      lastForward: null,
+      history: {
+        epochs: [],
+        absError: [],
+        avgLoss: [],
+        h1: [],
+        h2: [],
+        y: [],
+        w1: [],
+        w2: [],
+        w5: [],
+        w6: []
+      }
+    };
+
+    function sigmoid(x) {
+      return 1 / (1 + Math.exp(-x));
+    }
+
+    function sigmoidDerivativeFromOutput(y) {
+      return y * (1 - y);
+    }
+
+    function round(value, digits = 4) {
+      return Number(value).toFixed(digits);
+    }
+
+    function clamp01(value) {
+      return Math.min(1, Math.max(0, value));
+    }
+
+    function randomWeight() {
+      return Number(((Math.random() * 2) - 1).toFixed(2));
+    }
+
+    function readControls() {
+      state.maxEpochs = Math.max(1, parseInt(dom.epochsInput.value, 10) || 1);
+      state.learningRate = Math.max(0.001, parseFloat(dom.learningRateInput.value) || 0.7);
+      state.speed = Math.max(1, parseInt(dom.speedInput.value, 10) || 1);
+      state.threshold = clamp01(parseFloat(dom.thresholdInput.value) || 0.5);
+      dom.epochMaxText.textContent = state.maxEpochs;
+      dom.lrText.textContent = round(state.learningRate, 3);
+    }
+
+    function readParamsFromInputs() {
+      Object.keys(state.params).forEach((key) => {
+        const parsed = parseFloat(paramInputs[key].value);
+        state.params[key] = Number.isFinite(parsed) ? parsed : state.params[key];
+      });
+    }
+
+    function writeParamsToInputs() {
+      Object.keys(state.params).forEach((key) => {
+        paramInputs[key].value = Number(state.params[key]).toFixed(2);
+      });
+    }
+
+    function resetHistory() {
+      Object.keys(state.history).forEach((key) => {
+        state.history[key] = [];
+      });
+    }
+
+    function getVisibleSample() {
+      const mode = dom.sampleSelect.value;
+      if (mode === 'auto') {
+        return dataset[state.cycleIndex % dataset.length];
+      }
+      const index = parseInt(mode, 10);
+      return dataset[index] || dataset[0];
+    }
+
+    function forwardPass(x1, x2, params = state.params) {
+      const z1 = params.w1 * x1 + params.w2 * x2 + params.b1;
+      const h1 = sigmoid(z1);
+      const z2 = params.w3 * x1 + params.w4 * x2 + params.b2;
+      const h2 = sigmoid(z2);
+      const z3 = params.w5 * h1 + params.w6 * h2 + params.b3;
+      const y = sigmoid(z3);
+      return { x1, x2, z1, h1, z2, h2, z3, y };
+    }
+
+    function computeAverageLoss() {
+      let total = 0;
+      for (const sample of dataset) {
+        const result = forwardPass(sample.input[0], sample.input[1]);
+        total += 0.5 * Math.pow(sample.target - result.y, 2);
+      }
+      return total / dataset.length;
+    }
+
+    function predictClass(y) {
+      return y >= state.threshold ? 1 : 0;
+    }
+
+    function trainOneSample(sample) {
+      const [x1, x2] = sample.input;
+      const target = sample.target;
+      const p = state.params;
+      const fp = forwardPass(x1, x2, p);
+
+      const error = target - fp.y;
+      const deltaOutput = error * sigmoidDerivativeFromOutput(fp.y);
+      const deltaHidden1 = sigmoidDerivativeFromOutput(fp.h1) * p.w5 * deltaOutput;
+      const deltaHidden2 = sigmoidDerivativeFromOutput(fp.h2) * p.w6 * deltaOutput;
+
+      p.w5 += state.learningRate * deltaOutput * fp.h1;
+      p.w6 += state.learningRate * deltaOutput * fp.h2;
+      p.b3 += state.learningRate * deltaOutput;
+
+      p.w1 += state.learningRate * deltaHidden1 * x1;
+      p.w2 += state.learningRate * deltaHidden1 * x2;
+      p.b1 += state.learningRate * deltaHidden1;
+
+      p.w3 += state.learningRate * deltaHidden2 * x1;
+      p.w4 += state.learningRate * deltaHidden2 * x2;
+      p.b2 += state.learningRate * deltaHidden2;
+
+      state.lastForward = {
+        ...fp,
+        target,
+        error,
+        absError: Math.abs(error),
+        predictedClass: predictClass(fp.y),
+        deltaOutput,
+        deltaHidden1,
+        deltaHidden2
+      };
+    }
+
+    function pushHistory() {
+      const sample = getVisibleSample();
+      const visible = forwardPass(sample.input[0], sample.input[1]);
+      const avgLoss = computeAverageLoss();
+      const absError = Math.abs(sample.target - visible.y);
+
+      state.history.epochs.push(state.epoch);
+      state.history.absError.push(absError);
+      state.history.avgLoss.push(avgLoss);
+      state.history.h1.push(visible.h1);
+      state.history.h2.push(visible.h2);
+      state.history.y.push(visible.y);
+      state.history.w1.push(state.params.w1);
+      state.history.w2.push(state.params.w2);
+      state.history.w5.push(state.params.w5);
+      state.history.w6.push(state.params.w6);
+
+      if (state.history.epochs.length > 300) {
+        Object.keys(state.history).forEach((key) => {
+          state.history[key].shift();
+        });
+      }
+    }
+
+    function trainTick(stepCount = state.speed) {
+      if (state.epoch >= state.maxEpochs) {
+        stopTraining('Training complete');
+        updateAllViews();
+        return;
+      }
+
+      for (let i = 0; i < stepCount && state.epoch < state.maxEpochs; i += 1) {
+        const sample = dataset[state.sampleIndex % dataset.length];
+        trainOneSample(sample);
+        state.sampleIndex += 1;
+        state.epoch += 1;
+        state.cycleIndex = state.sampleIndex;
+        pushHistory();
+      }
+
+      updateAllViews();
+
+      if (state.epoch >= state.maxEpochs) {
+        stopTraining('Training complete');
+      }
+    }
+
+    function startTraining() {
+      readControls();
+      readParamsFromInputs();
+      if (state.running) return;
+      state.running = true;
+      dom.statusText.textContent = 'Running';
+      dom.runDot.style.background = 'var(--green)';
+      dom.runDot.style.boxShadow = '0 0 14px rgba(54, 211, 153, 0.85)';
+      state.timerId = setInterval(() => trainTick(), 90);
+      toggleButtons();
+    }
+
+    function stopTraining(label = 'Paused') {
+      state.running = false;
+      dom.statusText.textContent = label;
+      dom.runDot.style.background = label === 'Training complete' ? 'var(--cyan)' : 'var(--orange)';
+      dom.runDot.style.boxShadow = label === 'Training complete'
+        ? '0 0 14px rgba(100, 228, 255, 0.85)'
+        : '0 0 14px rgba(255, 179, 87, 0.85)';
+      clearInterval(state.timerId);
+      state.timerId = null;
+      toggleButtons();
+    }
+
+    function resetSimulation(keepParams = false) {
+      stopTraining('Idle');
+      readControls();
+      if (!keepParams) {
+        readParamsFromInputs();
+      }
+      state.epoch = 0;
+      state.sampleIndex = 0;
+      state.cycleIndex = 0;
+      state.lastForward = null;
+      resetHistory();
+      pushHistory();
+      updateAllViews();
+    }
+
+    function randomizeParameters() {
+      Object.keys(state.params).forEach((key) => {
+        state.params[key] = randomWeight();
+      });
+      writeParamsToInputs();
+      resetSimulation(true);
+    }
+
+    function toggleButtons() {
+      dom.startBtn.disabled = state.running || state.epoch >= state.maxEpochs;
+      dom.pauseBtn.disabled = !state.running;
+      dom.stepBtn.disabled = state.running || state.epoch >= state.maxEpochs;
+    }
+
+    function createLineChart(ctx, labelConfigs, yMin = 0, yMax = 1.05) {
+      return new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: labelConfigs.map(config => ({
+            label: config.label,
+            data: [],
+            borderColor: config.color,
+            backgroundColor: config.color,
+            pointRadius: 0,
+            borderWidth: 2.5,
+            tension: 0.25
+          }))
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: false,
+          plugins: {
+            legend: {
+              labels: {
+                color: '#dcecff'
+              }
+            }
+          },
+          scales: {
+            x: {
+              ticks: { color: '#aac7ef' },
+              grid: { color: 'rgba(255,255,255,0.06)' }
+            },
+            y: {
+              min: yMin,
+              max: yMax,
+              ticks: { color: '#aac7ef' },
+              grid: { color: 'rgba(255,255,255,0.06)' }
+            }
+          }
+        }
+      });
+    }
+
+    const errorChart = createLineChart(
+      document.getElementById('errorChart'),
+      [
+        { label: 'Absolute error', color: '#64e4ff' },
+        { label: 'Average loss', color: '#f04f9b' }
+      ],
+      0,
+      1
+    );
+
+    const activationChart = createLineChart(
+      document.getElementById('activationChart'),
+      [
+        { label: 'Hidden neuron h1', color: '#4ea0ff' },
+        { label: 'Hidden neuron h2', color: '#36d399' },
+        { label: 'Output neuron y', color: '#ffb357' }
+      ],
+      0,
+      1
+    );
+
+    const weightChart = createLineChart(
+      document.getElementById('weightChart'),
+      [
+        { label: 'w1', color: '#7cc1ff' },
+        { label: 'w2', color: '#f04f9b' },
+        { label: 'w5', color: '#36d399' },
+        { label: 'w6', color: '#ffb357' }
+      ],
+      -4,
+      4
+    );
+
+    function updateCharts() {
+      const labels = state.history.epochs;
+
+      errorChart.data.labels = labels;
+      errorChart.data.datasets[0].data = state.history.absError;
+      errorChart.data.datasets[1].data = state.history.avgLoss;
+      errorChart.update();
+
+      activationChart.data.labels = labels;
+      activationChart.data.datasets[0].data = state.history.h1;
+      activationChart.data.datasets[1].data = state.history.h2;
+      activationChart.data.datasets[2].data = state.history.y;
+      activationChart.update();
+
+      weightChart.data.labels = labels;
+      weightChart.data.datasets[0].data = state.history.w1;
+      weightChart.data.datasets[1].data = state.history.w2;
+      weightChart.data.datasets[2].data = state.history.w5;
+      weightChart.data.datasets[3].data = state.history.w6;
+      weightChart.update();
+    }
+
+    function weightColor(value) {
+      if (value >= 0) {
+        const alpha = Math.min(0.95, 0.18 + Math.abs(value) * 0.22);
+        return `rgba(100, 228, 255, ${alpha})`;
+      }
+      const alpha = Math.min(0.95, 0.18 + Math.abs(value) * 0.22);
+      return `rgba(240, 79, 155, ${alpha})`;
+    }
+
+    function connectionThickness(value) {
+      return Math.max(2, Math.min(10, 2 + Math.abs(value) * 3.2));
+    }
+
+    function neuronFill(value) {
+      const v = clamp01(value);
+      const r = Math.round(35 + v * 65);
+      const g = Math.round(90 + v * 125);
+      const b = Math.round(180 + v * 55);
+      return `rgb(${r}, ${g}, ${b})`;
+    }
+
+    function renderNetworkDiagram() {
+      const sample = getVisibleSample();
+      const [x1, x2] = sample.input;
+      const fp = forwardPass(x1, x2);
+      const p = state.params;
+      const svg = dom.networkSvg;
+      const predictedClass = predictClass(fp.y);
+
+      const nodes = {
+        x1: { x: 140, y: 150, r: 44, value: x1, label: 'x1' },
+        x2: { x: 140, y: 370, r: 44, value: x2, label: 'x2' },
+        h1: { x: 500, y: 150, r: 52, value: fp.h1, label: 'h1' },
+        h2: { x: 500, y: 370, r: 52, value: fp.h2, label: 'h2' },
+        y: { x: 840, y: 260, r: 58, value: fp.y, label: 'y' }
+      };
+
+      const connections = [
+        { from: nodes.x1, to: nodes.h1, weight: p.w1, label: `w1 = ${round(p.w1, 3)}` },
+        { from: nodes.x2, to: nodes.h1, weight: p.w2, label: `w2 = ${round(p.w2, 3)}` },
+        { from: nodes.x1, to: nodes.h2, weight: p.w3, label: `w3 = ${round(p.w3, 3)}` },
+        { from: nodes.x2, to: nodes.h2, weight: p.w4, label: `w4 = ${round(p.w4, 3)}` },
+        { from: nodes.h1, to: nodes.y, weight: p.w5, label: `w5 = ${round(p.w5, 3)}` },
+        { from: nodes.h2, to: nodes.y, weight: p.w6, label: `w6 = ${round(p.w6, 3)}` }
+      ];
+
+      const connectionMarkup = connections.map((c) => {
+        const mx = (c.from.x + c.to.x) / 2;
+        const my = (c.from.y + c.to.y) / 2;
+        return `
+          <g>
+            <line x1="${c.from.x + c.from.r - 8}" y1="${c.from.y}" x2="${c.to.x - c.to.r + 8}" y2="${c.to.y}"
+              stroke="${weightColor(c.weight)}" stroke-width="${connectionThickness(c.weight)}" stroke-linecap="round" />
+            <text x="${mx}" y="${my - 8}" fill="#ebf5ff" font-size="18" text-anchor="middle">${c.label}</text>
+          </g>`;
+      }).join('');
+
+      const nodeMarkup = Object.values(nodes).map((n) => `
+        <g>
+          <circle cx="${n.x}" cy="${n.y}" r="${n.r}" fill="${neuronFill(n.value)}" stroke="rgba(255,255,255,0.18)" stroke-width="3"></circle>
+          <text x="${n.x}" y="${n.y - 8}" fill="#07111f" font-size="28" font-weight="800" text-anchor="middle">${n.label}</text>
+          <text x="${n.x}" y="${n.y + 22}" fill="#07111f" font-size="24" font-weight="700" text-anchor="middle">${round(n.value, 3)}</text>
+        </g>
+      `).join('');
+
+      const biasMarkup = `
+        <text x="500" y="74" fill="#7cc1ff" font-size="18" text-anchor="middle">b1 = ${round(p.b1, 3)}</text>
+        <text x="500" y="464" fill="#7cc1ff" font-size="18" text-anchor="middle">b2 = ${round(p.b2, 3)}</text>
+        <text x="840" y="86" fill="#7cc1ff" font-size="18" text-anchor="middle">b3 = ${round(p.b3, 3)}</text>
+      `;
+
+      svg.innerHTML = `
+        <defs>
+          <linearGradient id="bgGlow" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="rgba(78,160,255,0.12)"/>
+            <stop offset="100%" stop-color="rgba(100,228,255,0.02)"/>
+          </linearGradient>
+          <marker id="arrowHead" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+            <polygon points="0 0, 10 4, 0 8" fill="rgba(255,255,255,0.55)"></polygon>
+          </marker>
+        </defs>
+        <rect x="0" y="0" width="1000" height="520" fill="url(#bgGlow)"></rect>
+        <text x="88" y="64" fill="#d9edff" font-size="28">Input layer</text>
+        <text x="430" y="64" fill="#d9edff" font-size="28">Hidden layer</text>
+        <text x="781" y="64" fill="#d9edff" font-size="28">Output layer</text>
+        ${connectionMarkup}
+        ${nodeMarkup}
+        ${biasMarkup}
+        <path d="M 60 468 C 210 468, 760 468, 940 468" stroke="rgba(255,255,255,0.14)" stroke-width="2" fill="none" marker-end="url(#arrowHead)" />
+        <text x="66" y="500" fill="#aac7ef" font-size="18">Forward pass</text>
+        <text x="806" y="148" fill="#ebf5ff" font-size="24">target = ${sample.target}</text>
+        <text x="782" y="182" fill="#ebf5ff" font-size="24">class = ${predictedClass}</text>
+      `;
+
+      dom.outputText.textContent = round(fp.y, 4);
+      dom.targetText.textContent = sample.target;
+      dom.overlayHidden.textContent = `${round(fp.h1, 4)}, ${round(fp.h2, 4)}`;
+      dom.overlayOutput.textContent = round(fp.y, 5);
+      dom.sampleText.textContent = sample.label;
+    }
+
+    function updateWeightsTable() {
+      const rows = Object.entries(state.params).map(([name, value]) => `
+        <tr>
+          <td>${name}</td>
+          <td>${round(value, 6)}</td>
+        </tr>
+      `).join('');
+      dom.weightsTableBody.innerHTML = rows;
+    }
+
+    function updateTruthTable() {
+      const rows = dataset.map((sample) => {
+        const result = forwardPass(sample.input[0], sample.input[1]);
+        const predictedClass = predictClass(result.y);
+        const isCorrect = predictedClass === sample.target;
+        return `
+          <tr>
+            <td>(${sample.input[0]}, ${sample.input[1]})</td>
+            <td>${sample.target}</td>
+            <td>${round(result.y, 6)}</td>
+            <td style="color:${isCorrect ? '#7ff5c4' : '#ffc298'};">${predictedClass} ${isCorrect ? '✓' : '✗'}</td>
+          </tr>
+        `;
+      }).join('');
+      dom.truthTableBody.innerHTML = rows;
+    }
+
+    function updateForwardDetails() {
+      const sample = getVisibleSample();
+      const [x1, x2] = sample.input;
+      const fp = forwardPass(x1, x2);
+      const avgLoss = computeAverageLoss();
+      const absError = Math.abs(sample.target - fp.y);
+      const predictedClass = predictClass(fp.y);
+
+      dom.forwardDetails.innerHTML = `
+        <strong>Visible sample:</strong> ${sample.label}<br>
+        <strong>z₁:</strong> ${round(fp.z1, 6)} → <strong>h₁:</strong> ${round(fp.h1, 6)}<br>
+        <strong>z₂:</strong> ${round(fp.z2, 6)} → <strong>h₂:</strong> ${round(fp.h2, 6)}<br>
+        <strong>z₃:</strong> ${round(fp.z3, 6)} → <strong>y:</strong> ${round(fp.y, 6)}<br>
+        <strong>Absolute error:</strong> ${round(absError, 6)}<br>
+        <strong>Average loss:</strong> ${round(avgLoss, 6)}<br>
+        <strong>Class with threshold ${round(state.threshold, 2)}:</strong> ${predictedClass}
+      `;
+
+      dom.absErrorMetric.textContent = round(absError, 6);
+      dom.avgErrorMetric.textContent = round(avgLoss, 6);
+      dom.overlayAvgError.textContent = round(avgLoss, 6);
+      dom.classMetric.textContent = predictedClass;
+      dom.epochText.textContent = state.epoch;
+      dom.progressMetric.textContent = `${Math.min(100, Math.round((state.epoch / state.maxEpochs) * 100))}%`;
+    }
+
+    function drawBoundary() {
+      const canvas = document.getElementById('boundaryCanvas');
+      const ctx = canvas.getContext('2d');
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      const width = Math.max(300, Math.floor(rect.width * dpr));
+      const height = Math.max(240, Math.floor(rect.height * dpr));
+      canvas.width = width;
+      canvas.height = height;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, width, height);
+
+      const logicalW = rect.width;
+      const logicalH = rect.height;
+      ctx.scale(dpr, dpr);
+
+      const resolution = 64;
+      const cellW = logicalW / resolution;
+      const cellH = logicalH / resolution;
+
+      for (let gy = 0; gy < resolution; gy += 1) {
+        for (let gx = 0; gx < resolution; gx += 1) {
+          const x = gx / (resolution - 1);
+          const y = 1 - gy / (resolution - 1);
+          const out = forwardPass(x, y).y;
+          const r = Math.round(70 + out * 70);
+          const g = Math.round(40 + out * 135);
+          const b = Math.round(110 + out * 100);
+          const alpha = 0.80;
+          ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`;
+          ctx.fillRect(gx * cellW, gy * cellH, cellW + 1, cellH + 1);
+        }
+      }
+
+      ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i <= 10; i += 1) {
+        const x = (logicalW / 10) * i;
+        const y = (logicalH / 10) * i;
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, logicalH);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(logicalW, y);
+        ctx.stroke();
+      }
+
+      ctx.strokeStyle = 'rgba(240, 247, 255, 0.9)';
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.moveTo(54, logicalH - 46);
+      ctx.lineTo(logicalW - 36, logicalH - 46);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(54, logicalH - 46);
+      ctx.lineTo(54, 28);
+      ctx.stroke();
+
+      ctx.fillStyle = '#f1f8ff';
+      ctx.font = '16px Segoe UI';
+      ctx.fillText('x1', logicalW - 26, logicalH - 56);
+      ctx.fillText('x2', 62, 22);
+
+      dataset.forEach(sample => {
+        const [x1, x2] = sample.input;
+        const px = 54 + x1 * (logicalW - 108);
+        const py = logicalH - 46 - x2 * (logicalH - 96);
+        ctx.beginPath();
+        ctx.arc(px, py, 14, 0, Math.PI * 2);
+        ctx.fillStyle = sample.target === 1 ? '#4ade80' : '#ff2f92';
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+        ctx.stroke();
+        ctx.fillStyle = '#f1f8ff';
+        ctx.font = '15px Segoe UI';
+        ctx.fillText(`(${x1}, ${x2})`, px + 20, py - 12);
+      });
+
+      ctx.fillStyle = '#f1f8ff';
+      ctx.font = '15px Segoe UI';
+      ctx.fillText('output ≈ 0', logicalW - 128, 28);
+      ctx.fillText('output ≈ 1', logicalW - 128, 48);
+
+      const gradientLegend = ctx.createLinearGradient(logicalW - 146, 60, logicalW - 16, 60);
+      gradientLegend.addColorStop(0, 'rgba(70, 40, 110, 0.95)');
+      gradientLegend.addColorStop(1, 'rgba(120, 195, 210, 0.95)');
+      ctx.fillStyle = gradientLegend;
+      ctx.fillRect(logicalW - 146, 64, 130, 12);
+    }
+
+    function runManualTest() {
+      const x1 = clamp01(parseFloat(testInputEls.x1.value) || 0);
+      const x2 = clamp01(parseFloat(testInputEls.x2.value) || 0);
+      const params = { ...state.params };
+
+      ['b1', 'b2', 'b3'].forEach((key) => {
+        const value = parseFloat(manualBiasInputs[key].value);
+        if (Number.isFinite(value)) params[key] = value;
+      });
+
+      const result = forwardPass(x1, x2, params);
+      const predictedClass = predictClass(result.y);
+      dom.manualOutputText.textContent = `${round(result.y, 6)}`;
+      dom.manualClassText.textContent = `${predictedClass} (threshold ${round(state.threshold, 2)})`;
+    }
+
+    function updateAllViews() {
+      readControls();
+      renderNetworkDiagram();
+      updateWeightsTable();
+      updateTruthTable();
+      updateForwardDetails();
+      updateCharts();
+      drawBoundary();
+      toggleButtons();
+      runManualTest();
+    }
+
+    dom.startBtn.addEventListener('click', startTraining);
+    dom.pauseBtn.addEventListener('click', () => stopTraining('Paused'));
+    dom.stepBtn.addEventListener('click', () => {
+      readControls();
+      readParamsFromInputs();
+      trainTick(1);
+    });
+    dom.resetBtn.addEventListener('click', () => resetSimulation());
+    dom.randomizeBtn.addEventListener('click', randomizeParameters);
+    dom.runTestBtn.addEventListener('click', runManualTest);
+
+    [dom.epochsInput, dom.learningRateInput, dom.speedInput, dom.sampleSelect, dom.thresholdInput].forEach((el) => {
+      el.addEventListener('input', updateAllViews);
+      el.addEventListener('change', updateAllViews);
+    });
+
+    Object.values(paramInputs).forEach((el) => {
+      el.addEventListener('input', () => {
+        if (!state.running) {
+          readParamsFromInputs();
+          updateAllViews();
+        }
+      });
+    });
+
+    [...Object.values(manualBiasInputs), ...Object.values(testInputEls)].forEach((el) => {
+      el.addEventListener('input', runManualTest);
+    });
+
+    window.addEventListener('resize', drawBoundary);
+
+    writeParamsToInputs();
+    resetSimulation(true);
+  </script>
+</body>
+</html>
