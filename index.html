@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,6 +8,7 @@
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
   <div class="bg-grid"></div>
 
@@ -16,7 +18,8 @@
       <h1>Watch a small neural network learn XOR in real time.</h1>
       <p>
         This website demonstrates how a simple feed-forward neural network with backpropagation solves the XOR problem.
-        You can train the model live, inspect every weight and bias, follow the neuron activations, test your own inputs,
+        You can train the model live, inspect every weight and bias, follow the neuron activations, test your own
+        inputs,
         and study both the mathematics and the visual behavior of the model.
       </p>
       <div class="hero-links">
@@ -29,7 +32,8 @@
       <h2>Interactive XOR Simulator</h2>
       <p class="lead">
         The model is a classic 2 → 2 → 1 neural network: two inputs, two hidden neurons, and one output neuron.
-        Use the controls below to train it, pause it, step through learning one update at a time, or test your own inputs.
+        Use the controls below to train it, pause it, step through learning one update at a time, or test your own
+        inputs.
       </p>
 
       <div class="controls-grid">
@@ -72,7 +76,8 @@
             <button class="btn-secondary" id="randomizeBtn">Randomize</button>
           </div>
           <p class="small-note">
-            <strong>Suggested use:</strong> first train with the default settings, then use <code class="inline">Step</code>
+            <strong>Suggested use:</strong> first train with the default settings, then use <code
+              class="inline">Step</code>
             to inspect how one training update changes the network.
           </p>
         </div>
@@ -176,7 +181,8 @@
             <h3>Network diagram</h3>
             <p>Full-width live model view with inputs, activations, weights, biases, and output.</p>
           </div>
-          <div class="status-pill">Target: <span id="targetText">0</span> • Output: <span id="outputText">0.000</span></div>
+          <div class="status-pill">Target: <span id="targetText">0</span> • Output: <span id="outputText">0.000</span>
+          </div>
         </div>
         <div class="diagram-stage wide-stage">
           <svg id="networkSvg" viewBox="0 0 1200 560" aria-label="Neural network diagram"></svg>
@@ -276,7 +282,8 @@
       <h2>Mathematical Explanation of the XOR Neural Network</h2>
       <p class="lead">
         This section explains the whole model step by step with equations, meanings, and visual diagrams.
-        The text is written for high school students with some math background, but every important term is also explained in plain English.
+        The text is written for high school students with some math background, but every important term is also
+        explained in plain English.
       </p>
 
       <div class="math-grid top-math-grid">
@@ -296,10 +303,26 @@
                 </tr>
               </thead>
               <tbody>
-                <tr><td>0</td><td>0</td><td>0</td></tr>
-                <tr><td>0</td><td>1</td><td>1</td></tr>
-                <tr><td>1</td><td>0</td><td>1</td></tr>
-                <tr><td>1</td><td>1</td><td>0</td></tr>
+                <tr>
+                  <td>0</td>
+                  <td>0</td>
+                  <td>0</td>
+                </tr>
+                <tr>
+                  <td>0</td>
+                  <td>1</td>
+                  <td>1</td>
+                </tr>
+                <tr>
+                  <td>1</td>
+                  <td>0</td>
+                  <td>1</td>
+                </tr>
+                <tr>
+                  <td>1</td>
+                  <td>1</td>
+                  <td>0</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -307,57 +330,66 @@
             A single linear neuron computes something like
             <code class="inline">z = w₁x₁ + w₂x₂ + b</code> and then applies one threshold or activation.
             That creates only one straight decision boundary.
-            But in XOR, the points that belong to class <code class="inline">1</code> lie on opposite corners, so one straight line cannot separate the classes.
+            But in XOR, the points that belong to class <code class="inline">1</code> lie on opposite corners, so one
+            straight line cannot separate the classes.
           </p>
           <p class="formula-line">
-            <strong>Conclusion:</strong> XOR is <em>not linearly separable</em>, therefore a network with a hidden layer is needed.
+            <strong>Conclusion:</strong> XOR is <em>not linearly separable</em>, therefore a network with a hidden layer
+            is needed.
           </p>
         </div>
 
         <div class="formula-card large-card">
           <h3>Visual idea of the model</h3>
           <div class="formula-visual big-visual">
-            <svg viewBox="0 0 620 500" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Neural network architecture image">
+            <svg viewBox="0 0 620 500" xmlns="http://www.w3.org/2000/svg" role="img"
+              aria-label="Neural network architecture image">
               <defs>
                 <linearGradient id="iNode" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stop-color="#5bb6ff"/>
-                  <stop offset="100%" stop-color="#4ea0ff"/>
+                  <stop offset="0%" stop-color="#5bb6ff" />
+                  <stop offset="100%" stop-color="#4ea0ff" />
                 </linearGradient>
                 <linearGradient id="hNode" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stop-color="#9be4ff"/>
-                  <stop offset="100%" stop-color="#68d6ff"/>
+                  <stop offset="0%" stop-color="#9be4ff" />
+                  <stop offset="100%" stop-color="#68d6ff" />
                 </linearGradient>
                 <linearGradient id="oNode" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stop-color="#ffb357"/>
-                  <stop offset="100%" stop-color="#ff8a32"/>
+                  <stop offset="0%" stop-color="#ffb357" />
+                  <stop offset="100%" stop-color="#ff8a32" />
                 </linearGradient>
               </defs>
-              <rect x="0" y="0" width="620" height="500" rx="24" fill="#071423" stroke="rgba(255,255,255,0.08)"/>
-              <text x="210" y="42" fill="#eaf4ff" font-size="28" font-family="Segoe UI, sans-serif" font-weight="700">XOR Network Architecture</text>
+              <rect x="0" y="0" width="620" height="500" rx="24" fill="#071423" stroke="rgba(255,255,255,0.08)" />
+              <text x="138" y="42" fill="#eaf4ff" font-size="28" font-family="Segoe UI, sans-serif"
+                font-weight="700">XOR Network Architecture</text>
 
               <text x="62" y="92" fill="#7cc1ff" font-size="22">Input Layer</text>
               <text x="255" y="92" fill="#7cc1ff" font-size="22">Hidden Layer</text>
               <text x="484" y="92" fill="#7cc1ff" font-size="22">Output</text>
 
-              <circle cx="100" cy="180" r="34" fill="url(#iNode)"/><text x="88" y="190" fill="#07111f" font-size="26" font-weight="700">x₁</text>
-              <circle cx="100" cy="300" r="34" fill="url(#iNode)"/><text x="88" y="310" fill="#07111f" font-size="26" font-weight="700">x₂</text>
-              <circle cx="300" cy="160" r="44" fill="url(#hNode)"/><text x="286" y="170" fill="#07111f" font-size="26" font-weight="700">h₁</text>
-              <circle cx="300" cy="320" r="44" fill="url(#hNode)"/><text x="286" y="330" fill="#07111f" font-size="26" font-weight="700">h₂</text>
-              <circle cx="510" cy="240" r="50" fill="url(#oNode)"/><text x="499" y="250" fill="#07111f" font-size="28" font-weight="700">y</text>
+              <circle cx="100" cy="180" r="34" fill="url(#iNode)" /><text x="88" y="190" fill="#07111f" font-size="26"
+                font-weight="700">x₁</text>
+              <circle cx="100" cy="300" r="34" fill="url(#iNode)" /><text x="88" y="310" fill="#07111f" font-size="26"
+                font-weight="700">x₂</text>
+              <circle cx="300" cy="160" r="44" fill="url(#hNode)" /><text x="286" y="170" fill="#07111f" font-size="26"
+                font-weight="700">h₁</text>
+              <circle cx="300" cy="320" r="44" fill="url(#hNode)" /><text x="286" y="330" fill="#07111f" font-size="26"
+                font-weight="700">h₂</text>
+              <circle cx="510" cy="240" r="50" fill="url(#oNode)" /><text x="499" y="250" fill="#07111f" font-size="28"
+                font-weight="700">y</text>
 
-              <line x1="132" y1="180" x2="256" y2="160" stroke="#eaf4ff" stroke-width="3"/>
-              <line x1="132" y1="180" x2="256" y2="320" stroke="#eaf4ff" stroke-width="3"/>
-              <line x1="132" y1="300" x2="256" y2="160" stroke="#eaf4ff" stroke-width="3"/>
-              <line x1="132" y1="300" x2="256" y2="320" stroke="#eaf4ff" stroke-width="3"/>
-              <line x1="344" y1="160" x2="462" y2="240" stroke="#eaf4ff" stroke-width="3"/>
-              <line x1="344" y1="320" x2="462" y2="240" stroke="#eaf4ff" stroke-width="3"/>
+              <line x1="132" y1="180" x2="256" y2="160" stroke="#eaf4ff" stroke-width="3" />
+              <line x1="132" y1="180" x2="256" y2="320" stroke="#eaf4ff" stroke-width="3" />
+              <line x1="132" y1="300" x2="256" y2="160" stroke="#eaf4ff" stroke-width="3" />
+              <line x1="132" y1="300" x2="256" y2="320" stroke="#eaf4ff" stroke-width="3" />
+              <line x1="344" y1="160" x2="462" y2="240" stroke="#eaf4ff" stroke-width="3" />
+              <line x1="344" y1="320" x2="462" y2="240" stroke="#eaf4ff" stroke-width="3" />
 
-              <text x="175" y="150" fill="#eaf4ff" font-size="18">w₁</text>
-              <text x="168" y="248" fill="#eaf4ff" font-size="18">w₃</text>
+              <text x="175" y="155" fill="#eaf4ff" font-size="18">w₁</text>
+              <text x="178" y="278" fill="#eaf4ff" font-size="18">w₃</text>
               <text x="178" y="212" fill="#eaf4ff" font-size="18">w₂</text>
-              <text x="176" y="326" fill="#eaf4ff" font-size="18">w₄</text>
+              <text x="176" y="332" fill="#eaf4ff" font-size="18">w₄</text>
               <text x="394" y="178" fill="#eaf4ff" font-size="18">w₅</text>
-              <text x="394" y="300" fill="#eaf4ff" font-size="18">w₆</text>
+              <text x="394" y="312" fill="#eaf4ff" font-size="18">w₆</text>
 
               <text x="40" y="402" fill="#eaf4ff" font-size="18">h₁ = σ(w₁x₁ + w₂x₂ + b₁)</text>
               <text x="40" y="432" fill="#eaf4ff" font-size="18">h₂ = σ(w₃x₁ + w₄x₂ + b₂)</text>
@@ -376,8 +408,8 @@
           </p>
           <div class="formula-block">
             <div><strong>Hidden neuron 1:</strong></div>
-            <div>\( z_1 = w_1x_1 + w_2x_2 + b_1 \)</div>
-            <div>\( h_1 = \sigma(z_1) = \frac{1}{1 + e^{-z_1}} \)</div>
+            <div>z₁ = w₁x₁ + w₂x₂ + b₁</div>
+            <div>h₁ = σ(z₁) = 1 / (1 + e<sup>−z₁</sup>)</div>
           </div>
           <p>
             Here <code class="inline">z₁</code> is the weighted sum for hidden neuron 1.
@@ -385,8 +417,8 @@
           </p>
           <div class="formula-block">
             <div><strong>Hidden neuron 2:</strong></div>
-            <div>\( z_2 = w_3x_1 + w_4x_2 + b_2 \)</div>
-            <div>\( h_2 = \sigma(z_2) = \frac{1}{1 + e^{-z_2}} \)</div>
+            <div>z₂ = w₃x₁ + w₄x₂ + b₂</div>
+            <div>h₂ = σ(z₂) = 1 / (1 + e<sup>−z₂</sup>)</div>
           </div>
           <p>
             The second hidden neuron does the same calculation, but with different weights and a different bias.
@@ -394,8 +426,9 @@
           </p>
           <div class="formula-block">
             <div><strong>Output neuron:</strong></div>
-            <div>\( z_3 = w_5h_1 + w_6h_2 + b_3 \)</div>
-            <div>\( y = \sigma(z_3) = \frac{1}{1 + e^{-z_3}} \)</div>
+            <div>z₃ = w₅h₁ + w₆h₂ + b₃</div>
+            <div>y = σ(z₃) = 1 / (1 + e<sup>−z₃</sup>)</div>
+
           </div>
           <p>
             The output neuron uses the two hidden activations as its inputs.
@@ -410,22 +443,27 @@
         <div class="formula-card">
           <h3>Forward propagation image</h3>
           <div class="formula-visual">
-            <svg viewBox="0 0 520 440" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Forward propagation flow image">
-              <rect x="0" y="0" width="520" height="440" rx="24" fill="#071423" stroke="rgba(255,255,255,0.08)"/>
-              <text x="34" y="46" fill="#eaf4ff" font-size="28" font-family="Segoe UI" font-weight="700">Forward Propagation</text>
-              <rect x="34" y="82" width="452" height="74" rx="18" fill="rgba(78,160,255,0.16)" stroke="rgba(124,193,255,0.22)"/>
+            <svg viewBox="0 0 520 440" xmlns="http://www.w3.org/2000/svg" role="img"
+              aria-label="Forward propagation flow image">
+              <rect x="0" y="0" width="520" height="440" rx="24" fill="#071423" stroke="rgba(255,255,255,0.08)" />
+              <text x="34" y="46" fill="#eaf4ff" font-size="28" font-family="Segoe UI" font-weight="700">Forward
+                Propagation</text>
+              <rect x="34" y="82" width="452" height="74" rx="18" fill="rgba(78,160,255,0.16)"
+                stroke="rgba(124,193,255,0.22)" />
               <text x="52" y="118" fill="#eaf4ff" font-size="21">1. Give the network inputs x₁ and x₂</text>
               <text x="52" y="142" fill="#b7cae8" font-size="16">Example: (1, 0) or (0, 1)</text>
 
-              <rect x="34" y="176" width="452" height="88" rx="18" fill="rgba(100,228,255,0.12)" stroke="rgba(124,193,255,0.22)"/>
+              <rect x="34" y="176" width="452" height="96" rx="18" fill="rgba(100,228,255,0.12)"
+                stroke="rgba(124,193,255,0.22)" />
               <text x="52" y="210" fill="#eaf4ff" font-size="21">2. Compute hidden layer sums and activations</text>
               <text x="52" y="236" fill="#b7cae8" font-size="16">z₁, z₂ then h₁ = σ(z₁), h₂ = σ(z₂)</text>
               <text x="52" y="258" fill="#b7cae8" font-size="16">The hidden layer creates intermediate features</text>
 
-              <rect x="34" y="284" width="452" height="88" rx="18" fill="rgba(255,179,87,0.14)" stroke="rgba(255,179,87,0.24)"/>
-              <text x="52" y="318" fill="#eaf4ff" font-size="21">3. Compute output sum and activation</text>
-              <text x="52" y="344" fill="#b7cae8" font-size="16">z₃ = w₅h₁ + w₆h₂ + b₃</text>
-              <text x="52" y="366" fill="#b7cae8" font-size="16">y = σ(z₃) gives the final prediction</text>
+              <rect x="34" y="292" width="452" height="96" rx="18" fill="rgba(255,179,87,0.14)"
+                stroke="rgba(255,179,87,0.24)" />
+              <text x="52" y="326" fill="#eaf4ff" font-size="21">3. Compute output sum and activation</text>
+              <text x="52" y="352" fill="#b7cae8" font-size="16">z₃ = w₅h₁ + w₆h₂ + b₃</text>
+              <text x="52" y="374" fill="#b7cae8" font-size="16">y = σ(z₃) gives the final prediction</text>
             </svg>
           </div>
         </div>
@@ -439,12 +477,14 @@
             This tells us how wrong the network is.
           </p>
           <div class="formula-block">
-            <div>\( e = t - y \)</div>
-            <div>\( E = \frac{1}{2}(t - y)^2 \)</div>
+            <div>e = t − y</div>
+            <div>E = ½(t − y)²</div>
           </div>
           <p>
-            In these formulas, <code class="inline">t</code> is the target value and <code class="inline">y</code> is the network output.
-            The squared error is always non-negative, and it becomes smaller as the prediction gets closer to the target.
+            In these formulas, <code class="inline">t</code> is the target value and <code class="inline">y</code> is
+            the network output.
+            The squared error is always non-negative, and it becomes smaller as the prediction gets closer to the
+            target.
             The factor <code class="inline">1/2</code> is used only to make the derivative simpler later.
           </p>
           <p>
@@ -460,19 +500,21 @@
           </p>
           <div class="formula-block">
             <div><strong>Output layer delta:</strong></div>
-            <div>\( \delta_3 = (t - y) \cdot y(1-y) \)</div>
+            <div>δ₃ = (t − y) · y · (1 − y)</div>
           </div>
           <p>
-            The term <code class="inline">y(1-y)</code> is the derivative of the sigmoid function when the output is already known.
+            The term <code class="inline">y(1-y)</code> is the derivative of the sigmoid function when the output is
+            already known.
             This tells us how sensitive the output neuron is at that point.
           </p>
           <div class="formula-block">
             <div><strong>Hidden layer deltas:</strong></div>
-            <div>\( \delta_1 = h_1(1-h_1) \cdot w_5\delta_3 \)</div>
-            <div>\( \delta_2 = h_2(1-h_2) \cdot w_6\delta_3 \)</div>
+            <div>δ₁ = h₁(1 − h₁) · w₅ · δ₃</div>
+            <div>δ₂ = h₂(1 − h₂) · w₆ · δ₃</div>
           </div>
           <p>
-            These equations say: the hidden neurons are corrected according to how much they influenced the output neuron,
+            These equations say: the hidden neurons are corrected according to how much they influenced the output
+            neuron,
             and according to the slope of their own sigmoid activations.
           </p>
         </div>
@@ -482,30 +524,35 @@
         <div class="formula-card">
           <h3>Backpropagation image</h3>
           <div class="formula-visual">
-            <svg viewBox="0 0 520 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Backpropagation flow image">
-              <rect x="0" y="0" width="520" height="420" rx="24" fill="#071423" stroke="rgba(255,255,255,0.08)"/>
-              <text x="34" y="46" fill="#eaf4ff" font-size="28" font-family="Segoe UI" font-weight="700">Backpropagation</text>
-              <circle cx="118" cy="212" r="42" fill="#8fdcf5"/>
-              <circle cx="260" cy="142" r="42" fill="#8fdcf5"/>
-              <circle cx="260" cy="282" r="42" fill="#8fdcf5"/>
-              <circle cx="414" cy="212" r="50" fill="#ff9a3c"/>
+            <svg viewBox="0 0 520 420" xmlns="http://www.w3.org/2000/svg" role="img"
+              aria-label="Backpropagation flow image">
+              <rect x="0" y="0" width="520" height="420" rx="24" fill="#071423" stroke="rgba(255,255,255,0.08)" />
+              <text x="34" y="46" fill="#eaf4ff" font-size="28" font-family="Segoe UI"
+                font-weight="700">Backpropagation</text>
+              <circle cx="118" cy="212" r="42" fill="#8fdcf5" />
+              <circle cx="260" cy="142" r="42" fill="#8fdcf5" />
+              <circle cx="260" cy="282" r="42" fill="#8fdcf5" />
+              <circle cx="414" cy="212" r="50" fill="#ff9a3c" />
               <text x="105" y="222" fill="#07111f" font-size="26" font-weight="700">x</text>
               <text x="246" y="152" fill="#07111f" font-size="26" font-weight="700">h₁</text>
               <text x="246" y="292" fill="#07111f" font-size="26" font-weight="700">h₂</text>
               <text x="402" y="222" fill="#07111f" font-size="28" font-weight="700">y</text>
-              <line x1="158" y1="202" x2="222" y2="154" stroke="#eaf4ff" stroke-width="3"/>
-              <line x1="158" y1="222" x2="222" y2="270" stroke="#eaf4ff" stroke-width="3"/>
-              <line x1="300" y1="154" x2="364" y2="196" stroke="#eaf4ff" stroke-width="3"/>
-              <line x1="300" y1="270" x2="364" y2="228" stroke="#eaf4ff" stroke-width="3"/>
-              <path d="M 440 106 L 440 48" stroke="#ff4f9b" stroke-width="8" fill="none" marker-end="url(#bpArrow)"/>
-              <path d="M 366 184 C 340 150, 320 128, 288 112" stroke="#ff4f9b" stroke-width="6" fill="none" marker-end="url(#bpArrow)"/>
-              <path d="M 366 240 C 340 270, 320 288, 286 308" stroke="#ff4f9b" stroke-width="6" fill="none" marker-end="url(#bpArrow)"/>
+              <line x1="158" y1="202" x2="222" y2="154" stroke="#eaf4ff" stroke-width="3" />
+              <line x1="158" y1="222" x2="222" y2="270" stroke="#eaf4ff" stroke-width="3" />
+              <line x1="300" y1="154" x2="364" y2="196" stroke="#eaf4ff" stroke-width="3" />
+              <line x1="300" y1="270" x2="364" y2="228" stroke="#eaf4ff" stroke-width="3" />
+              <path d="M 440 125 L 440 48" stroke="#ff4f9b" stroke-width="8" fill="none" marker-end="url(#bpArrow)" />
+              <path d="M 366 184 C 340 150, 320 128, 288 112" stroke="#ff4f9b" stroke-width="6" fill="none"
+                marker-end="url(#bpArrow)" />
+              <path d="M 366 240 C 340 270, 320 288, 286 308" stroke="#ff4f9b" stroke-width="6" fill="none"
+                marker-end="url(#bpArrow)" />
               <defs>
-                <marker id="bpArrow" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto">
-                  <polygon points="0 0, 8 3, 0 6" fill="#ff4f9b"/>
+                <marker id="bpArrow" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto">
+                  <polygon points="0 0, 8 3, 0 6" fill="#ff4f9b" />
                 </marker>
               </defs>
-              <text x="32" y="374" fill="#b7cae8" font-size="17">Error is computed at the output, then distributed backward</text>
+              <text x="32" y="374" fill="#b7cae8" font-size="17">Error is computed at the output, then distributed
+                backward</text>
               <text x="32" y="396" fill="#b7cae8" font-size="17">so every weight and bias can be corrected.</text>
             </svg>
           </div>
@@ -519,21 +566,22 @@
           </p>
           <div class="formula-block">
             <div><strong>Output layer updates:</strong></div>
-            <div>\( w_5 \leftarrow w_5 + \alpha \delta_3 h_1 \)</div>
-            <div>\( w_6 \leftarrow w_6 + \alpha \delta_3 h_2 \)</div>
-            <div>\( b_3 \leftarrow b_3 + \alpha \delta_3 \)</div>
+            <div>w₅ ← w₅ + α · δ₃ · h₁</div>
+            <div>w₆ ← w₆ + α · δ₃ · h₂</div>
+            <div>b₃ ← b₃ + α · δ₃</div>
           </div>
           <div class="formula-block">
             <div><strong>Hidden layer updates:</strong></div>
-            <div>\( w_1 \leftarrow w_1 + \alpha \delta_1 x_1 \)</div>
-            <div>\( w_2 \leftarrow w_2 + \alpha \delta_1 x_2 \)</div>
-            <div>\( b_1 \leftarrow b_1 + \alpha \delta_1 \)</div>
-            <div>\( w_3 \leftarrow w_3 + \alpha \delta_2 x_1 \)</div>
-            <div>\( w_4 \leftarrow w_4 + \alpha \delta_2 x_2 \)</div>
-            <div>\( b_2 \leftarrow b_2 + \alpha \delta_2 \)</div>
+            <div>w₁ ← w₁ + α · δ₁ · x₁</div>
+            <div>w₂ ← w₂ + α · δ₁ · x₂</div>
+            <div>b₁ ← b₁ + α · δ₁</div>
+            <div>w₃ ← w₃ + α · δ₂ · x₁</div>
+            <div>w₄ ← w₄ + α · δ₂ · x₂</div>
+            <div>b₂ ← b₂ + α · δ₂</div>
           </div>
           <p>
-            These equations mean that the network adjusts each parameter in the direction that should reduce the error next time.
+            These equations mean that the network adjusts each parameter in the direction that should reduce the error
+            next time.
             Repeating this process many times gradually teaches the network the XOR pattern.
           </p>
         </div>
@@ -563,20 +611,24 @@
             <li><strong>Sigmoid:</strong> activation that maps values into the interval 0 to 1.</li>
             <li><strong>Forward propagation:</strong> computing the prediction from input to output.</li>
             <li><strong>Error / loss:</strong> number that measures how wrong the network is.</li>
-            <li><strong>Backpropagation:</strong> method that calculates how the error should correct the parameters.</li>
+            <li><strong>Backpropagation:</strong> method that calculates how the error should correct the parameters.
+            </li>
             <li><strong>Learning rate:</strong> controls the size of the updates.</li>
             <li><strong>Epoch:</strong> one training update in this simulator's running sequence.</li>
-            <li><strong>Non-linear model:</strong> a model that can create curved or more complex decision boundaries.</li>
+            <li><strong>Non-linear model:</strong> a model that can create curved or more complex decision boundaries.
+            </li>
           </ul>
         </div>
       </div>
     </section>
 
     <div class="footer-note">
-      Built as an educational XOR neural network demonstrator with live visualization, charts, and mathematical explanation.
+      Built as an educational XOR neural network demonstrator with live visualization, charts, and mathematical
+      explanation.
     </div>
   </div>
 
   <script src="index.js"></script>
 </body>
+
 </html>

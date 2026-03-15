@@ -626,7 +626,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ctx.stroke();
       ctx.fillStyle = '#f1f8ff';
       ctx.font = '15px Segoe UI';
-      const labelOffsetX = x1 === 1 ? 16 : -74;
+      const labelOffsetX = x1 === 1 ? 16 : -48;
       const labelOffsetY = x2 === 1 ? -18 : 26;
       ctx.fillText(`(${x1}, ${x2})`, px + labelOffsetX, py + labelOffsetY);
     });
